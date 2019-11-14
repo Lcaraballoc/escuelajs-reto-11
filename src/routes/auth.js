@@ -11,7 +11,7 @@ require('../utils/auth/strategies/basic');
 
 function authApi(app) {
     const router = express.Router();
-    app.use('/login/', router);
+    app.use('/api/auth', router);
     
 
     const apiKeyService = new ApiKeysService();

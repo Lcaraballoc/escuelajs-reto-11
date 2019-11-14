@@ -1,7 +1,12 @@
 const express = require('express');
+const passport = require('passport');
 const path = require('path');
 const ProductService = require('../services');
 const receipt = '../assets/receipt.pdf'
+const scopesValidationHandler = require('../utils/middlewares/scopeValidationHandler')
+
+//JWT STRATEGY
+require('../utils/auth/strategies/jwt');
 
 const platziStore = (app) => {
   const router = express.Router();
@@ -29,18 +34,24 @@ const platziStore = (app) => {
     res.status(200).json(storeProducts);
   });
 
-  router.put('/products/:id', async (req, res, next) => {
-    const { id } = req.params
-    const { body: product } = req
-    const storeProducts = await productService.updateProductById({ id, ...product })
-    res.status(200).json(storeProducts);
-  });
+  router.put('/products/:id',
+    passport.authenticate('jwt', { session: false }),
+    scopesValidationHandler(['update:products']),
+    async (req, res, next) => {
+      const { id } = req.params
+      const { body: product } = req
+      const storeProducts = await productService.updateProductById({ id, ...product })
+      res.status(200).json(storeProducts);
+    });
 
-  router.delete('/products/:id', async (req, res, next) => {
-    const { id } = req.params
-    const storeProducts = await productService.deleteProductById(id)
-    res.status(200).json(storeProducts);
-  });
+  router.delete('/products/:id',
+    passport.authenticate('jwt', { session: false }),
+    scopesValidationHandler(['delete:products']),
+    async (req, res, next) => {
+      const { id } = req.params
+      const storeProducts = await productService.deleteProductById(id)
+      res.status(200).json(storeProducts);
+    });
 
   router.get('*', (req, res) => {
     res.status(404).send('Error 404');

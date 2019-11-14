@@ -13,6 +13,7 @@ app.get('/', (req, res) => {
 app.use(express.json());
 
 authApi(app);
+platziStore(app);
 
 
 app.listen(config.port, err => {
